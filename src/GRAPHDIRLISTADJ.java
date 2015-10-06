@@ -1,10 +1,13 @@
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 public class GRAPHDIRLISTADJ <N> implements TAD{
 	private List<Node<N>> list;
-	public GRAPHDIRLISTADJ(int max) {
+	
+	public GRAPHDIRLISTADJ() {
 		list = new ArrayList<Node<N>>();
 	}
 
@@ -18,44 +21,85 @@ public class GRAPHDIRLISTADJ <N> implements TAD{
 		return true;
 	}
 	
+	public void desmarcaNodos(){
+		for(Node<N> aux : list){
+			aux.setMarcado(false);
+		}
+	}
+	
+	public List<N> caminhamentoLargura(N elem) throws IllegalAccessException{
+		List<N> result = new ArrayList<N>();
+		Queue<Node<N>> fAux = new LinkedList<Node<N>>();
+		Node<N> nAUX;
+		int index = this.indexItem(elem);
+		if(index==-1){
+			throw new IllegalAccessException("Elemento invalido");
+		}
+		else{
+			this.desmarcaNodos();
+			result.add(list.get(index).getElem());
+			fAux.offer(list.get(index));
+			list.get(index).setMarcado(true);
+			while(!fAux.isEmpty()){
+				nAUX = fAux.poll();
+				ArrayList<Node<N>> l = (ArrayList<Node<N>>)getAdjacents(nAUX.getElem());
+				for(Node<N> v : l){
+					if(!v.isMarcado()){
+						result.add(v.getElem());
+						v.setMarcado(true);
+						fAux.offer(v);
+					}
+				}
+			}
+		}
+		return result;
+	}
+	
+	public List<N> caminhamentoProfundidade(N elem) throws IllegalAccessException{
+		int index = this.indexItem(elem);
+		if(index==-1){
+			throw new IllegalAccessException("Elemento invalido");
+		}
+		else{
+			desmarcaNodos();
+			ArrayList<N> result = new ArrayList<N>();
+			caminhamentoProfundidade(list.get(index),result);
+			return result;
+		}
+	}
+	
+	public void caminhamentoProfundidade(Node<N> nodo, List<N> list){
+		list.add(nodo.getElem());
+		nodo.setMarcado(true);
+		for (Node<N> aux : nodo.getlNodesAdj()) {
+			if(aux.isMarcado()==false)caminhamentoProfundidade(aux, list);
+		}
+	}
+	
+	private int indexItem(N elem) {
+		for(Node<N> aux : list){
+			if(aux.getElem().equals(elem))return list.indexOf(aux);
+		}
+		return -1;
+	}
+
 	public boolean addEdge(Object a, Object b) {
 		int i = 0;
-		boolean existeA = false, existeB = false;
-		int indexA = 0, indexB = 0;
-		while(i<list.size() && (existeA==false || existeB==false)){
-			if(list.get(i).getElem().equals((N)a)){
-				existeA = true;
-				indexA = i;
-			}
-			if(list.get(i).getElem().equals((N)b)){
-				existeB = true;
-				indexB = i;
-			}
-			i++;
-		}
-		if(existeA && existeB){
-			list.get(indexA).add(list.get(indexB).getElem());
+		int indexA = indexItem((N)a), indexB = indexItem((N)b);
+		if(indexA!=-1 && indexB!=-1){
+			list.get(indexA).addAdj(list.get(indexB));
 			return true;
 		}
 		return false;
 	}
 	
 	public boolean removeEdge(Object a, Object b) {
-		int i = 0;
-		boolean existeA = false, existeB = false;
-		int indexA = 0;
-		while(i<list.size() && existeA==false){
-			if(list.get(i).getElem().equals((N)a)){
-				existeA = true;
-				indexA = i;
-			}
-			i++;
-		}
-		if(existeA){
-			ArrayList<N> listElem = (ArrayList<N>) list.get(indexA).getlNodesAdj();
+		int indexA = indexItem((N)a), indexB = indexItem((N)b);
+		if(indexA!=-1 && indexB!=-1){
+			ArrayList<Node<N>> listAdj = (ArrayList<Node<N>>) list.get(indexA).getlNodesAdj();
 			int index = -1;
-			for (int j = 0; j < listElem.size(); j++) {
-				if(listElem.get(j).equals((N)b)){
+			for (int j = 0; j < listAdj.size(); j++) {
+				if(listAdj.get(j).getElem().equals((N)b)){
 					index = j;
 					break;
 				}
@@ -67,20 +111,11 @@ public class GRAPHDIRLISTADJ <N> implements TAD{
 	}
 	
 	public boolean existEdge(Object a, Object b) {
-		int i = 0;
-		boolean existeA = false, existeB = false;
-		int indexA = 0;
-		while(i<list.size() && existeA==false){
-			if(list.get(i).getElem().equals((N)a)){
-				existeA = true;
-				indexA = i;
-			}
-			i++;
-		}
-		if(existeA){
-			ArrayList<N> listElem = (ArrayList<N>) list.get(indexA).getlNodesAdj();
-			for (int j = 0; j < listElem.size(); j++) {
-				if(listElem.get(j).equals((N)b)){
+		int indexA = indexItem((N)a);
+		if(indexA!=-1){
+			ArrayList<Node<N>> listElem = (ArrayList<Node<N>>) list.get(indexA).getlNodesAdj();
+			for (Node<N> aux : listElem) {
+				if(aux.getElem().equals((N)b)){
 					return true;
 				}
 			}
@@ -89,16 +124,16 @@ public class GRAPHDIRLISTADJ <N> implements TAD{
 	}
 	
 	public boolean removeElem(Object a){
-		ArrayList<N> lAUX;
+		ArrayList<Node<N>> lAUX;
 		for(Node<N> aux : list){
 			if(aux.getElem().equals((N)a)){
 				list.remove(aux);
 				break;
 			}
 			else{
-				lAUX = (ArrayList<N>)aux.getlNodesAdj();
+				lAUX = (ArrayList<Node<N>>)aux.getlNodesAdj();
 				for(int i = 0; i<lAUX.size();){
-					if(lAUX.get(i).equals((N)a)){
+					if(lAUX.get(i).getElem().equals((N)a)){
 						aux.remove(i);
 						break;
 					}
@@ -113,15 +148,6 @@ public class GRAPHDIRLISTADJ <N> implements TAD{
 			System.out.print(aux.getElem().toString()+" ");
 		}
 		System.out.println();
-	}
-	
-	public int existe(Object a){
-		for (int i = 0; i<list.size(); i++) {
-			if(list.get(i).getElem().equals((N)a)){
-				return i;
-			}
-		}
-		return -1;
 	}
 	
 	public int degree(Object node) {
@@ -160,9 +186,14 @@ public class GRAPHDIRLISTADJ <N> implements TAD{
 		}
 		return null;
 	}
-	
-	public static void main(String[] args) {
-		GRAPHDIRLISTADJ<Integer> Grafo = new GRAPHDIRLISTADJ<Integer>(10){};
+	public List<Node<N>> getList() {
+		return list;
+	}
+	public void setList(List<Node<N>> list) {
+		this.list = list;
+	}
+	public static void main(String[] args) throws IllegalAccessException {
+		GRAPHDIRLISTADJ<Integer> Grafo = new GRAPHDIRLISTADJ<Integer>();
 		Grafo.addNode(1);
 		Grafo.addNode(2);
 		Grafo.addNode(3);
@@ -186,18 +217,42 @@ public class GRAPHDIRLISTADJ <N> implements TAD{
 		System.out.print("Lista: ");
 		Grafo.printLista();
 		System.out.println("ListAdj:");
-		lista = (ArrayList<Node<Integer>>)Grafo.getList();
-		for (Node<Integer> node : lista) {
+		Grafo.addNode(4);
+		Grafo.addNode(5);
+		Grafo.addEdge(1, 3);
+		Grafo.addEdge(3, 4);
+		Grafo.addEdge(4, 5);
+		Grafo.addEdge(3, 5);
+		
+		GRAPHDIRLISTADJ<String> grafo2 = new GRAPHDIRLISTADJ<String>();
+		grafo2.addNode("A");
+		grafo2.addNode("B");
+		grafo2.addNode("C");
+		grafo2.addNode("D");
+		grafo2.addNode("E");
+		grafo2.addNode("F");
+		grafo2.addNode("G");
+		grafo2.addNode("J");
+		grafo2.addEdge("A", "B");
+		grafo2.addEdge("A", "C");
+		grafo2.addEdge("A", "D");
+		grafo2.addEdge("B", "F");
+		grafo2.addEdge("F", "G");
+		grafo2.addEdge("B", "C");
+		grafo2.addEdge("C", "E");
+		grafo2.addEdge("C", "A");
+		grafo2.addEdge("G", "E");
+		grafo2.addEdge("D", "E");
+		grafo2.addEdge("D", "A");
+		grafo2.addEdge("J", "D");
+		
+		
+		System.out.println("Existe aresta 1 ->  2 ? "+Grafo.existEdge(1, 2));
+		System.out.println("Caminhamento em largura partindo do 1: "+grafo2.caminhamentoLargura("A").toString());
+		System.out.println("Caminhamento em profundidade partindo do 1: "+grafo2.caminhamentoProfundidade("A").toString());
+		ArrayList<Node<String>> lista2 = (ArrayList<Node<String>>)grafo2.getList();
+		for (Node<String> node : lista2) {
 			System.out.println(node.printListAdj());
 		}
-		System.out.println("Existe aresta 1 ->  2 ? "+Grafo.existEdge(1, 2));
-	}
-
-	public List<Node<N>> getList() {
-		return list;
-	}
-
-	public void setList(List<Node<N>> list) {
-		this.list = list;
 	}
 }
