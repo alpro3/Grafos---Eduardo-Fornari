@@ -253,7 +253,6 @@ public class GRAPHDIRLISTADJ <N> implements TAD{
 			res.add(a.getElem());
 			return res;
 		}
-		int pos = indexItem(a.getElem());
 		a.setMarcado(true);
 		ArrayList<Node<N>> adj = (ArrayList<Node<N>>)getAdjacents(a.getElem());
 		for(Node<N> aux : adj)
@@ -294,7 +293,6 @@ public class GRAPHDIRLISTADJ <N> implements TAD{
 			res.add(a.getElem());
 			return res;
 		}
-		int pos = indexItem(a.getElem());
 		a.setMarcado(true);
 		ArrayList<Node<N>> adj = (ArrayList<Node<N>>)getAdjacents(a.getElem());
 		for(Node<N> aux : adj)
@@ -306,7 +304,8 @@ public class GRAPHDIRLISTADJ <N> implements TAD{
 				{
 					res.add(0,a.getElem());
 					resMelhor = res;
-				}			}
+				}		
+			}
 		}
 		return resMelhor;
 	}

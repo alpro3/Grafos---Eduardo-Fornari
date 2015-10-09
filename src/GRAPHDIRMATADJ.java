@@ -286,6 +286,86 @@ public class GRAPHDIRMATADJ <N> implements TAD{
 		return false;
 	}
 	
+	public List<N> pathFrom(N a, N b) throws IllegalAccessException
+	{
+		desmarcaNodos();
+		int indexA = indexItem(a);
+		int indexB = indexItem(b);
+		if(indexA<0 || indexB<0)
+		{
+			throw new IllegalAccessException("IvalidNode");
+		}
+		else{
+			return pathFrom(lNodes.get(indexA), b);
+		}	
+	}
+	
+	public List<N> pathFrom(Nodo<N> a, N b)
+	{
+		List<N> res = null;
+		if(a.getElem().equals(b))
+		{
+			res = new ArrayList<N>();
+			res.add(a.getElem());
+			return res;
+		}
+		a.setMarcado(true);
+		ArrayList<Nodo<N>> adj = (ArrayList<Nodo<N>>)getAdjacents(a.getElem());
+		for(Nodo<N> aux : adj)
+		{
+			if(!aux.isMarcado())
+			{
+				res = pathFrom(aux, b);
+				if(res!=null)
+				{
+					res.add(0,a.getElem());
+					return res;
+				}			}
+		}
+		return res;
+	}
+	
+	public List<N> bestPathFrom(N a, N b) throws IllegalAccessException
+	{
+		desmarcaNodos();
+		int indexA = indexItem(a);
+		int indexB = indexItem(b);
+		if(indexA<0 || indexB<0)
+		{
+			throw new IllegalAccessException("IvalidNode");
+		}
+		else{
+			return bestPathFrom(lNodes.get(indexA), b);
+		}	
+	}
+	
+	public List<N> bestPathFrom(Nodo<N> a, N b)
+	{
+		List<N> res = null;
+		List<N> resMelhor = null;
+		if(a.getElem().equals(b))
+		{
+			res = new ArrayList<N>();
+			res.add(a.getElem());
+			return res;
+		}
+		a.setMarcado(true);
+		ArrayList<Nodo<N>> adj = (ArrayList<Nodo<N>>)getAdjacents(a.getElem());
+		for(Nodo<N> aux : adj)
+		{
+			if(!aux.isMarcado())
+			{
+				res = bestPathFrom(aux, b);
+				if(res!=null && (resMelhor==null ||(resMelhor!=null && res.size()<resMelhor.size())))
+				{
+					res.add(0,a.getElem());
+					resMelhor = res;
+				}		
+			}
+		}
+		return resMelhor;
+	}
+	
 	public static void main(String[] args) throws IllegalAccessException {
 		GRAPHDIRMATADJ<Integer> Grafo = new GRAPHDIRMATADJ<Integer>(5){};
 		Grafo.addNode(1);
@@ -343,12 +423,20 @@ public class GRAPHDIRMATADJ <N> implements TAD{
 		System.out.println("MatAdj:");
 		Grafo.printMatADJ();
 		System.out.println("Existe caminho do A para o A? "+grafo2.existeCaminho("A", "A"));
+		System.out.println("Qual o caminho? "+grafo2.bestPathFrom("A", "A"));
 		System.out.println("Existe caminho do A para o B? "+grafo2.existeCaminho("A", "B"));
+		System.out.println("Qual o caminho? "+grafo2.bestPathFrom("A", "B"));
 		System.out.println("Existe caminho do A para o C? "+grafo2.existeCaminho("A", "C"));
+		System.out.println("Qual o caminho? "+grafo2.bestPathFrom("A", "C"));
 		System.out.println("Existe caminho do A para o D? "+grafo2.existeCaminho("A", "D"));
+		System.out.println("Qual o caminho? "+grafo2.bestPathFrom("A", "D"));
 		System.out.println("Existe caminho do A para o E? "+grafo2.existeCaminho("A", "E"));
+		System.out.println("Qual o caminho? "+grafo2.bestPathFrom("A", "E"));
 		System.out.println("Existe caminho do A para o F? "+grafo2.existeCaminho("A", "F"));
+		System.out.println("Qual o caminho? "+grafo2.bestPathFrom("A", "F"));
 		System.out.println("Existe caminho do A para o G? "+grafo2.existeCaminho("A", "G"));
+		System.out.println("Qual o caminho? "+grafo2.bestPathFrom("A", "G"));
 		System.out.println("Existe caminho do A para o J? "+grafo2.existeCaminho("A", "J"));
+		System.out.println("Qual o caminho? "+grafo2.bestPathFrom("A", "J"));
 	}
 }
