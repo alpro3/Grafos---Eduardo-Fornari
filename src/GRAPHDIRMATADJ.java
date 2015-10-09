@@ -253,7 +253,38 @@ public class GRAPHDIRMATADJ <N> implements TAD{
 		for(int i=0;i<lNodes.size();i++){
 			if(matAdj[index][i] && lNodes.get(i).isMarcado()==false)caminhamentoProfundidade(lNodes.get(i), list);
 		}
-	}	
+	}
+	
+	public boolean existeCaminho(N a, N b){
+		int indexA = indexItem(a), indexB = indexItem(b);
+		if(indexA>=0 && indexB>=0){
+			desmarcaNodos();
+			return existeCaminho(lNodes.get(indexA), b);
+		}
+		return false;
+	}
+
+	private boolean existeCaminho(Nodo<N> a, N b) {
+		List<Nodo<N>> listAdj;
+		
+		if(a.getElem().equals(b)){
+			return true;
+		}
+		else
+		{
+			a.setMarcado(true);
+			listAdj = getAdjacents(a.getElem());
+			
+			for(Nodo<N> n : listAdj){
+				if(!n.isMarcado()){
+					if(existeCaminho(n,b)){
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
 	
 	public static void main(String[] args) throws IllegalAccessException {
 		GRAPHDIRMATADJ<Integer> Grafo = new GRAPHDIRMATADJ<Integer>(5){};
@@ -311,5 +342,13 @@ public class GRAPHDIRMATADJ <N> implements TAD{
 		Grafo.printLista();
 		System.out.println("MatAdj:");
 		Grafo.printMatADJ();
+		System.out.println("Existe caminho do A para o A? "+grafo2.existeCaminho("A", "A"));
+		System.out.println("Existe caminho do A para o B? "+grafo2.existeCaminho("A", "B"));
+		System.out.println("Existe caminho do A para o C? "+grafo2.existeCaminho("A", "C"));
+		System.out.println("Existe caminho do A para o D? "+grafo2.existeCaminho("A", "D"));
+		System.out.println("Existe caminho do A para o E? "+grafo2.existeCaminho("A", "E"));
+		System.out.println("Existe caminho do A para o F? "+grafo2.existeCaminho("A", "F"));
+		System.out.println("Existe caminho do A para o G? "+grafo2.existeCaminho("A", "G"));
+		System.out.println("Existe caminho do A para o J? "+grafo2.existeCaminho("A", "J"));
 	}
 }

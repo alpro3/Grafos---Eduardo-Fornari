@@ -6,7 +6,7 @@ import java.util.Queue;
 
 public class GRAPHDIRLISTADJ <N> implements TAD{
 	private List<Node<N>> list;
-	
+
 	public GRAPHDIRLISTADJ() {
 		list = new ArrayList<Node<N>>();
 	}
@@ -20,13 +20,13 @@ public class GRAPHDIRLISTADJ <N> implements TAD{
 		list.add(new Node<N>((N)a));
 		return true;
 	}
-	
+
 	public void desmarcaNodos(){
 		for(Node<N> aux : list){
 			aux.setMarcado(false);
 		}
 	}
-	
+
 	public List<N> caminhamentoLargura(N elem) throws IllegalAccessException{
 		List<N> result = new ArrayList<N>();
 		Queue<Node<N>> fAux = new LinkedList<Node<N>>();
@@ -54,7 +54,7 @@ public class GRAPHDIRLISTADJ <N> implements TAD{
 		}
 		return result;
 	}
-	
+
 	public List<N> caminhamentoProfundidade(N elem) throws IllegalAccessException{
 		int index = this.indexItem(elem);
 		if(index==-1){
@@ -67,7 +67,7 @@ public class GRAPHDIRLISTADJ <N> implements TAD{
 			return result;
 		}
 	}
-	
+
 	public void caminhamentoProfundidade(Node<N> nodo, List<N> list){
 		list.add(nodo.getElem());
 		nodo.setMarcado(true);
@@ -75,7 +75,7 @@ public class GRAPHDIRLISTADJ <N> implements TAD{
 			if(aux.isMarcado()==false)caminhamentoProfundidade(aux, list);
 		}
 	}
-	
+
 	private int indexItem(N elem) {
 		for(Node<N> aux : list){
 			if(aux.getElem().equals(elem))return list.indexOf(aux);
@@ -92,7 +92,7 @@ public class GRAPHDIRLISTADJ <N> implements TAD{
 		}
 		return false;
 	}
-	
+
 	public boolean removeEdge(Object a, Object b) {
 		int indexA = indexItem((N)a), indexB = indexItem((N)b);
 		if(indexA!=-1 && indexB!=-1){
@@ -109,7 +109,7 @@ public class GRAPHDIRLISTADJ <N> implements TAD{
 		}
 		return false;
 	}
-	
+
 	public boolean existEdge(Object a, Object b) {
 		int indexA = indexItem((N)a);
 		if(indexA!=-1){
@@ -122,7 +122,7 @@ public class GRAPHDIRLISTADJ <N> implements TAD{
 		}
 		return false;
 	}
-	
+
 	public boolean removeElem(Object a){
 		ArrayList<Node<N>> lAUX;
 		for(Node<N> aux : list){
@@ -142,14 +142,14 @@ public class GRAPHDIRLISTADJ <N> implements TAD{
 		}
 		return false;
 	}
-	
+
 	public void printLista() {
 		for(Node<N> aux : list){
 			System.out.print(aux.getElem().toString()+" ");
 		}
 		System.out.println();
 	}
-	
+
 	public int degree(Object node) {
 		int cont = 0;
 		int index = -1;
@@ -192,6 +192,125 @@ public class GRAPHDIRLISTADJ <N> implements TAD{
 	public void setList(List<Node<N>> list) {
 		this.list = list;
 	}
+
+	public boolean existeCaminho(N a, N b){
+		int indexA = indexItem(a), indexB = indexItem(b);
+		if(indexA>=0 && indexB>=0){
+			desmarcaNodos();
+			return existeCaminho(list.get(indexA), b);
+		}
+		return false;
+	}
+
+	private boolean existeCaminho(Node<N> a, N b) {
+		List<Node<N>> listAdj;
+		
+		if(a.getElem().equals(b)){
+			return true;
+		}
+		else
+		{
+			a.setMarcado(true);
+			listAdj = a.getlNodesAdj();
+			
+			for(Node<N> n : listAdj){
+				if(!n.isMarcado()){
+					if(existeCaminho(n,b)){
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+	
+	public void printGrafo(){
+		for (Node<N> node : list) {
+			System.out.println(node.printListAdj());
+		}
+	}
+	
+	public List<N> pathFrom(N a, N b) throws IllegalAccessException
+	{
+		desmarcaNodos();
+		int indexA = indexItem(a);
+		int indexB = indexItem(b);
+		if(indexA<0 || indexB<0)
+		{
+			throw new IllegalAccessException("IvalidNode");
+		}
+		else{
+			return pathFrom(list.get(indexA), b);
+		}	
+	}
+	
+	public List<N> pathFrom(Node<N> a, N b)
+	{
+		List<N> res = null;
+		if(a.getElem().equals(b))
+		{
+			res = new ArrayList<N>();
+			res.add(a.getElem());
+			return res;
+		}
+		int pos = indexItem(a.getElem());
+		a.setMarcado(true);
+		ArrayList<Node<N>> adj = (ArrayList<Node<N>>)getAdjacents(a.getElem());
+		for(Node<N> aux : adj)
+		{
+			if(!aux.isMarcado())
+			{
+				res = pathFrom(aux, b);
+				if(res!=null)
+				{
+					res.add(0,a.getElem());
+					return res;
+				}			}
+		}
+		return res;
+	}
+	
+	public List<N> bestPathFrom(N a, N b) throws IllegalAccessException
+	{
+		desmarcaNodos();
+		int indexA = indexItem(a);
+		int indexB = indexItem(b);
+		if(indexA<0 || indexB<0)
+		{
+			throw new IllegalAccessException("IvalidNode");
+		}
+		else{
+			return bestPathFrom(list.get(indexA), b);
+		}	
+	}
+	
+	public List<N> bestPathFrom(Node<N> a, N b)
+	{
+		List<N> res = null;
+		List<N> resMelhor = null;
+		if(a.getElem().equals(b))
+		{
+			res = new ArrayList<N>();
+			res.add(a.getElem());
+			return res;
+		}
+		int pos = indexItem(a.getElem());
+		a.setMarcado(true);
+		ArrayList<Node<N>> adj = (ArrayList<Node<N>>)getAdjacents(a.getElem());
+		for(Node<N> aux : adj)
+		{
+			if(!aux.isMarcado())
+			{
+				res = bestPathFrom(aux, b);
+				if(res!=null && (resMelhor==null ||(resMelhor!=null && res.size()<resMelhor.size())))
+				{
+					res.add(0,a.getElem());
+					resMelhor = res;
+				}			}
+		}
+		return resMelhor;
+	}
+
 	public static void main(String[] args) throws IllegalAccessException {
 		GRAPHDIRLISTADJ<Integer> Grafo = new GRAPHDIRLISTADJ<Integer>();
 		Grafo.addNode(1);
@@ -205,10 +324,7 @@ public class GRAPHDIRLISTADJ <N> implements TAD{
 		System.out.print("Lista: ");
 		Grafo.printLista();
 		System.out.println("ListAdj:");
-		ArrayList<Node<Integer>> lista = (ArrayList<Node<Integer>>)Grafo.getList();
-		for (Node<Integer> node : lista) {
-			System.out.println(node.printListAdj());
-		}
+		Grafo.printGrafo();
 		System.out.println("Grau do elemento 1: "+Grafo.degree(1));
 		System.out.println("Elemento 1 é alcançavel? "+Grafo.isReachable(1));
 		System.out.println("Lista de adjacentes do elemento 1: "+Grafo.getAdjacents(1));
@@ -223,7 +339,7 @@ public class GRAPHDIRLISTADJ <N> implements TAD{
 		Grafo.addEdge(3, 4);
 		Grafo.addEdge(4, 5);
 		Grafo.addEdge(3, 5);
-		
+
 		GRAPHDIRLISTADJ<String> grafo2 = new GRAPHDIRLISTADJ<String>();
 		grafo2.addNode("A");
 		grafo2.addNode("B");
@@ -245,14 +361,27 @@ public class GRAPHDIRLISTADJ <N> implements TAD{
 		grafo2.addEdge("D", "E");
 		grafo2.addEdge("D", "A");
 		grafo2.addEdge("J", "D");
-		
-		
+
+
 		System.out.println("Existe aresta 1 ->  2 ? "+Grafo.existEdge(1, 2));
 		System.out.println("Caminhamento em largura partindo do 1: "+grafo2.caminhamentoLargura("A").toString());
 		System.out.println("Caminhamento em profundidade partindo do 1: "+grafo2.caminhamentoProfundidade("A").toString());
-		ArrayList<Node<String>> lista2 = (ArrayList<Node<String>>)grafo2.getList();
-		for (Node<String> node : lista2) {
-			System.out.println(node.printListAdj());
-		}
+		grafo2.printGrafo();
+		System.out.println("Existe caminho do A para o A? "+grafo2.existeCaminho("A", "A"));
+		System.out.println("Qual o caminho? "+grafo2.bestPathFrom("A", "A"));
+		System.out.println("Existe caminho do A para o B? "+grafo2.existeCaminho("A", "B"));
+		System.out.println("Qual o caminho? "+grafo2.bestPathFrom("A", "B"));
+		System.out.println("Existe caminho do A para o C? "+grafo2.existeCaminho("A", "C"));
+		System.out.println("Qual o caminho? "+grafo2.bestPathFrom("A", "C"));
+		System.out.println("Existe caminho do A para o D? "+grafo2.existeCaminho("A", "D"));
+		System.out.println("Qual o caminho? "+grafo2.bestPathFrom("A", "D"));
+		System.out.println("Existe caminho do A para o E? "+grafo2.existeCaminho("A", "E"));
+		System.out.println("Qual o caminho? "+grafo2.bestPathFrom("A", "E"));
+		System.out.println("Existe caminho do A para o F? "+grafo2.existeCaminho("A", "F"));
+		System.out.println("Qual o caminho? "+grafo2.bestPathFrom("A", "F"));
+		System.out.println("Existe caminho do A para o G? "+grafo2.existeCaminho("A", "G"));
+		System.out.println("Qual o caminho? "+grafo2.bestPathFrom("A", "G"));
+		System.out.println("Existe caminho do A para o J? "+grafo2.existeCaminho("A", "J"));
+		System.out.println("Qual o caminho? "+grafo2.bestPathFrom("A", "J"));
 	}
 }

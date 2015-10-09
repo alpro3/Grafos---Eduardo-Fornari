@@ -1,17 +1,17 @@
 import java.util.ArrayList;
 import java.util.List;
 
-public class Node<N>{
+public class Node<E>{
+		
+		private List<Node<E>> lNodesAdj;
 	
-		private List<Node<N>> lNodesAdj;
-	
-		private N elem;
+		private E elem;
 		
 		boolean marcado;
 		
-		public Node(N node){
+		public Node(E node){
 			elem = node;
-			lNodesAdj = new ArrayList<Node<N>>();
+			lNodesAdj = new ArrayList<Node<E>>();
 		}
 		
 		public boolean isMarcado() {
@@ -22,21 +22,21 @@ public class Node<N>{
 			this.marcado = marcado;
 		}
 		
-		public void addAdj(Node<N> node){
+		public void addAdj(Node<E> node){
 			if(!lNodesAdj.contains(node)){
 				lNodesAdj.add(node);
 			}
 		}
 		
-		public List<Node<N>> getlNodesAdj() {
+		public List<Node<E>> getlNodesAdj() {
 			return lNodesAdj;
 		}
 		
-		public N getElem() {
+		public E getElem() {
 			return elem;
 		}
 		
-		public void setElem(N elem) {
+		public void setElem(E elem) {
 			this.elem = elem;
 		}
 		
@@ -48,7 +48,7 @@ public class Node<N>{
 		
 		public String printListAdj() {
 			String lista = elem.toString() + " = {";
-			for (Node<N> aux : lNodesAdj) {
+			for (Node<E> aux : lNodesAdj) {
 				lista+=" ";
 				lista+=aux.toString();
 			}
